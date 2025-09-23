@@ -3,13 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Models\Customers;
-use App\Models\TransOrders;
-use Illuminate\Http\Request;
-use App\Models\TypeOfServices;
-use Illuminate\Support\Carbon;
-use App\Models\TransOrderDetails;
 use App\Models\TransLaundryPickup;
-use Illuminate\Support\Facades\DB;
+use App\Models\TransOrderDetails;
+use App\Models\TransOrders;
+use App\Models\TypeOfServices;
+use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use RealRashid\SweetAlert\Facades\Alert;
 
 class TransOrderController extends Controller
@@ -27,11 +26,10 @@ class TransOrderController extends Controller
      */
     public function create()
     {
-        $customers = Customers::all();
         $today = Carbon::now()->format('dmY');
         $countDay = TransOrders::whereDate('created_at', now())->count() + 1;
         $runningNumber = str_pad($countDay, 3, '0', STR_PAD_LEFT);
-        $code = 'TR-' . $today . '-' . $runningNumber;
+        $code = 'TRLV-' . $today . '-' . $runningNumber;
         $title = "Transaction Order";
         $customers = Customers::orderBy('id', 'desc')->get();
         $services = TypeOfServices::orderBy('id', 'desc')->get();
@@ -45,65 +43,72 @@ class TransOrderController extends Controller
      */
     public function store(Request $request)
     {
-        // $dataValidated = $request->validate([
-        //     'id_customer' => 'required|numeric|exists:customers,id',
-        //     'order_code' => 'required|string|unique:trans_orders,order_code',
-        //     'order_end_date' => 'required|date',
-        //     'order_note' => 'nullable|string',
-        //     'order_pay' => 'nullable|numeric',
-        //     'order_change' => 'nullable|numeric',
-        //     'total' => 'required|numeric'
-        // ]);
-
-        // $order = TransOrders::create($dataValidated);
-        // $id_order = $order->id;
-        // foreach ($request->id_service as $key => $idService) {
-        //     $dataValidated2 = $request->validate([
-        //         'id_service' => 'required|numeric|exists:services,id',
-        //         '' => 'nullable|numeric',
-        //         'total' => 'required|numeric'
-        //     ]);
-        // }
-
-        if (empty($request->total)) {
-            Alert::error('Oops...', 'Please Add Service Packet');
-            return back();
-        }
-
         $order = TransOrders::create([
-            'id_customer' => $request->id_customer,
-            'order_code' => $request->order_code,
+            'id_customer' => $request->customer['id'],
+            'order_code' => $request->id,
             'order_date' => Carbon::now(),
             'order_end_date' => Carbon::now()->addDays(2),
-            'order_note' => $request->order_note,
-            'total' => $request->total
+            'order_note' => $request->order_note ?? null,
+            'total' => $request->total,
+            'order_status' => $request->status
         ]);
 
-        $id_order = $order->id;
-        foreach ($request->id_service as $index => $idService) {
-            try {
-                $request->notes[$index];
-                TransOrderDetails::create([
-                    'id_order' => $id_order,
-                    'id_service' => $idService,
-                    'qty' => $request->qty[$index] * 1000,
-                    'subtotal' => $request->subtotal[$index],
-                    'notes' => $request->notes[$index]
-                ]);
-            } catch (\Throwable $th) {
-                TransOrderDetails::create([
-                    'id_order' => $id_order,
-                    'id_service' => $idService,
-                    'qty' => $request->qty[$index] * 1000,
-                    'subtotal' => $request->subtotal[$index],
-
-                ]);
-            }
+        foreach ($request->items as $item) {
+            TransOrderDetails::create([
+                'id_order' => $order->id,
+                'id_service' => $item['id_service'],
+                'qty' => $item['weight'],
+                'price' => $item['price'],
+                'subtotal' => $item['subtotal'],
+                'notes' => $item['notes'] ?? null
+            ]);
         }
 
-        Alert::success('Excellent', 'Add order data successfully');
-        return redirect()->route('order.index')->with('success', 'Add order data successfully');
+        return response()->json([
+            'status' => true,
+            'message' => 'Data Transaksi berhasil ditambahkan!!'
+        ]);
     }
+    //  if (empty($request->total)) {
+    //         Alert::error('Oops...', 'Please Add Service Packet');
+    //         return back();
+    //     }
+
+    //     $order = TransOrders::create([
+    //         'id_customer' => $request->id_customer,
+    //         'order_code' => $request->order_code,
+    //         'order_date' => Carbon::now(),
+    //         'order_end_date' => Carbon::now()->addDays(2),
+    //         'order_note' => $request->order_note,
+    //         'total' => $request->total
+    //     ]);
+
+    //     $id_order = $order->id;
+    //     foreach ($request->id_service as $index => $idService) {
+    //         try {
+    //             $request->notes[$index];
+    //             TransOrderDetails::create([
+    //                 'id_order' => $id_order,
+    //                 'id_service' => $idService,
+    //                 'qty' => $request->qty[$index] * 1000,
+    //                 'subtotal' => $request->subtotal[$index],
+    //                 'notes' => $request->notes[$index]
+    //             ]);
+    //         } catch (\Throwable $th) {
+    //             TransOrderDetails::create([
+    //                 'id_order' => $id_order,
+    //                 'id_service' => $idService,
+    //                 'qty' => $request->qty[$index] * 1000,
+    //                 'subtotal' => $request->subtotal[$index],
+
+    //             ]);
+    //         }
+    //     }
+
+    //     Alert::success('Excellent', 'Add order data successfully');
+    //     return redirect()->route('order.index')->with('success', 'Add order data successfully');
+    // }
+
 
     /**
      * Display the specified resource.
@@ -117,10 +122,10 @@ class TransOrderController extends Controller
                 'transLaundryPickups'
             ])->findOrFail($id);
 
-            return view('orders.show', compact('order'));
+            return view('order.show', compact('order'));
         } catch (\Throwable $e) {
             return redirect()
-                ->route('orders.index')
+                ->route('order.index')
                 ->with('error_message', 'Gagal memuat detail order: ' . $e->getMessage());
         }
     }
@@ -171,6 +176,28 @@ class TransOrderController extends Controller
         return redirect()->route('order.index')->with('success', 'Delete data order successfully');
     }
 
+
+    public function getSingleOrder($id)
+{
+    $order = TransOrders::with(['customer', 'details.service'])->where('id', $id)->first();
+
+    return response()->json($order);
+}
+public function updateOrderStatus(Request $request, $id)
+    {
+        $order = TransOrders::findOrFail($id);
+        $order->order_status = $request->order_status;
+        $order->save();
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Order status updated successfully!'
+        ]);
+    }
+
+
+
+
     public function printStruk(string $id)
     {
         $details = TransOrders::with(['customer', 'details.service'])->where('id', $id)->first();
@@ -180,55 +207,20 @@ class TransOrderController extends Controller
         return view('order.print', compact('details'));
     }
 
-    public function OrderStore(Request $request)
+    // public function getLayanan()
+    // {
+    //     $layanan = TypeOfServiceController::all();
+    //     $prices = $layanan->pluck('price', 'service_name');
+    //     return response()->json($prices);
+    // }
+
+    public function getOrders()
     {
-        $request->validate([
-            'id' => 'required|string',
-            'customer.id' => 'required|exists:customers,id',
-            'items' => 'required|array|min:1',
-            'total' => 'required|numeric',
-            'order_date' => 'required|date',
-            'order_status' => 'required|bool'
-        ]);
+        $orders = TransOrders::with(['customer', 'details.service'])
+            ->orderBy('id', 'desc')
+            ->get();
 
-        DB::beginTransaction();
-        try {
-            // Simpan Order
-            $order = TransOrders::create([
-                'order_code' => $request->id,
-                'id_customer' => $request->customer['id'],
-                'order_date' => Carbon::parse($request->order_date)->format('Y-m-d H:i:s'),
-                'order_end_date' => Carbon::now()->addDays(3)->toDateString(),
-                'order_status' => $request->order_status,
-                'total' => $request->total
-            ]);
-
-            // Simpan Detail Orders
-            foreach ($request->items as $item) {
-                TransOrderDetails::create([
-                    'id_order' => $order->id,
-                    'id_service' => $item['id_service'],
-                    'qty' => $item['weight'],
-                    'price' => $item['price'],
-                    'subtotal' => $item['subtotal'],
-                    'notes' => $item['notes'] ?? null
-                ]);
-            }
-
-            DB::commit();
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Transaksi berhasil disimpan',
-                'data' => $order->load('details.service', 'customer')
-            ], 201);
-        } catch (\Throwable $th) {
-            DB::rollBack();
-            return response()->json([
-                'success' => false,
-                'message' => 'Gagal Menyimpan Transaksi',
-                'error' => $th->getMessage()
-            ], 500);
-        }
+        return response()->json($orders);
     }
+
 }

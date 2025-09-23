@@ -19,7 +19,12 @@ Route::middleware(['auth', 'administrator'])->group(function () {
 Route::middleware(['auth', 'adopt'])->group(function () {
     Route::resource('customer', App\Http\Controllers\CustomerController::class);
     Route::resource('order', App\Http\Controllers\TransOrderController::class);
-    Route::post('laundry_post', [App\Http\Controllers\TransOrderController::class, 'OrderStore'])->name('orders.laundry_post');
+    Route::get('/order-json', [App\Http\Controllers\TransOrderController::class, 'getOrders'])->name('order.json');
+    Route::get('/order-json/{id}', [App\Http\Controllers\TransOrderController::class, 'getSingleOrder'])
+        ->name('order.json-single');
+    Route::put('/order-json-update-status/{id}', [App\Http\Controllers\TransOrderController::class, 'updateOrderStatus']);
+    // Route::get('order/create', [App\Http\Controllers\TransOrderController::class, 'create'])->name('order.form_order');
+    Route::put('/order/pickup/{id}', [App\Http\Controllers\TransOrderController::class, 'pickup'])->name('orders.pickup');
     Route::get("print_struk/{id}", [App\Http\Controllers\TransOrderController::class, 'printStruk'])->name('print_struk');
 });
 
