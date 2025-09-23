@@ -561,9 +561,9 @@
             <button class="btn btn-primary" onclick="showReports()" style="margin: 0 10px">
                 📈 Laporan Penjualan
             </button>
-            <button class="btn btn-warning" onclick="manageServices()" style="margin: 0 10px">
+            {{-- <button class="btn btn-warning" onclick="manageServices()" style="margin: 0 10px">
                 ⚙️ Kelola Layanan
-            </button>
+            </button> --}}
             <button class="btn btn-danger" onclick="clearCart()" style="margin: 0 10px">
                 🗑️ Bersihkan Keranjang
             </button>
@@ -697,17 +697,17 @@
                         ${transaction.items
                           .map(
                             (item) => `
-                                                                                                                         <div class="receipt-item">
-                                                                                                                         <span>${item.service} (${item.weight} ${
-                                                                                                                        item.service.includes("Sepatu")
-                                                                                                                        ? "pasang"
-                                                                                                                        : item.service.includes("Karpet")
-                                                                                                                        ? "m²"
-                                                                                                                        : "kg"
-                                                                                                                        })</span>
-                                                                                                                        <span>Rp ${item.subtotal.toLocaleString()}</span>
-                                                                                                                        </div>
-                                                                                                                    `
+                                                                                                                                 <div class="receipt-item">
+                                                                                                                                 <span>${item.service} (${item.weight} ${
+                                                                                                                                item.service.includes("Sepatu")
+                                                                                                                                ? "pasang"
+                                                                                                                                : item.service.includes("Karpet")
+                                                                                                                                ? "m²"
+                                                                                                                                : "kg"
+                                                                                                                                })</span>
+                                                                                                                                <span>Rp ${item.subtotal.toLocaleString()}</span>
+                                                                                                                                </div>
+                                                                                                                            `
                           )
                           .join("")}
                     </div>
@@ -766,7 +766,7 @@
                       .map(
                         (item) =>
                           `${item.service.service_name} - ${item.qty}kg
-                                                                                                                                              `
+                                                                                                                                                      `
                       )
                       .join(", ")}</p>
                     <p>💰 Rp ${transaction.total.toLocaleString()}</p>
@@ -810,20 +810,20 @@
                 <h2>📋 Semua Transaksi</h2>
                 <div style="max-height: 400px; overflow-y: auto;">
                     ${transactions.map((transaction) => `
-                                                                                                                    <div class="transaction-item">
-                                                                                                                    <h4>${transaction.order_code} - ${
-                                                                                                                    transaction.customer.customer_name}</h4>
-                                                                                                                <p>📞 ${formatPhoneNumberDynamic(transaction.customer.phone)}</p>
-                                                                                                                <p>🛍️ ${transaction.details.map((item) =>`${item.service.service_name} - ${item.qty}kg`).join(", ")}</p>
-                                                                                                                <p>💰 Rp ${transaction.total.toLocaleString()}</p>
-                                                                                                                <p>📅 ${new Date(transaction.order_date).toLocaleString("id-ID")}</p>
-                                                                                                                <span class="status-badge status-${transaction.order_status}">${transaction.order_status == 0? "Proses": transaction.order_status == 1 ? "Selesai": ""}</span>
-                                                                                                                <button class="btn btn-primary" onclick="updateTransactionStatus('${
-                                                                                                                                                  transaction.id}')" style="margin-top: 10px; padding: 5px 15px; font-size: 12px;">
-                                                                                                                                                    📝 Update Status
-                                                                                                                                                </button>
-                                                                                                                                            </div>
-                                                                                                                                       `
+                                                                                                                            <div class="transaction-item">
+                                                                                                                            <h4>${transaction.order_code} - ${
+                                                                                                                            transaction.customer.customer_name}</h4>
+                                                                                                                        <p>📞 ${formatPhoneNumberDynamic(transaction.customer.phone)}</p>
+                                                                                                                        <p>🛍️ ${transaction.details.map((item) =>`${item.service.service_name} - ${item.qty}kg`).join(", ")}</p>
+                                                                                                                        <p>💰 Rp ${transaction.total.toLocaleString()}</p>
+                                                                                                                        <p>📅 ${new Date(transaction.order_date).toLocaleString("id-ID")}</p>
+                                                                                                                        <span class="status-badge status-${transaction.order_status}">${transaction.order_status == 0? "Proses": transaction.order_status == 1 ? "Selesai": ""}</span>
+                                                                                                                        <button class="btn btn-primary" onclick="updateTransactionStatus('${
+                                                                                                                                                          transaction.id}')" style="margin-top: 10px; padding: 5px 15px; font-size: 12px;">
+                                                                                                                                                            📝 Update Status
+                                                                                                                                                        </button>
+                                                                                                                                                    </div>
+                                                                                                                                               `
                       )
                       .join("")}
                 </div>
@@ -890,12 +890,12 @@
                     </thead>
                     <tbody>
                         ${Object.entries(serviceStats).map(([service, stats]) => `
-                                                                                                                <tr>
-                                                                                                                    <td>${service}</td>
-                                                                                                                    <td>${stats.count}</td>
-                                                                                                                    <td>Rp. ${stats.revenue.toLocaleString('id-ID')}</td>
-                                                                                                                </tr>
-                                                                                                            `).join('')}
+                                                                                                                        <tr>
+                                                                                                                            <td>${service}</td>
+                                                                                                                            <td>${stats.count}</td>
+                                                                                                                            <td>Rp. ${stats.revenue.toLocaleString('id-ID')}</td>
+                                                                                                                        </tr>
+                                                                                                                    `).join('')}
                     </tbody>
                 </table>
             `;
@@ -905,70 +905,70 @@
         }
 
 
-        function manageServices() {
-            const servicesHtml = `
-                <h2>⚙️ Kelola Layanan</h2>
-                <p>Fitur ini memungkinkan Anda mengelola jenis layanan dan harga.</p>
+        // function manageServices() {
+        //     const servicesHtml = `
+    //         <h2>⚙️ Kelola Layanan</h2>
+    //         <p>Fitur ini memungkinkan Anda mengelola jenis layanan dan harga.</p>
 
-                <table class="cart-table">
-                    <thead>
-                        <tr>
-                            <th>Layanan</th>
-                            <th>Harga</th>
-                            <th>Satuan</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>Cuci Kering</td>
-                            <td>Rp 5.000</td>
-                            <td>per kg</td>
-                            <td><span class="status-badge status-ready">Aktif</span></td>
-                        </tr>
-                        <tr>
-                            <td>Cuci Setrika</td>
-                            <td>Rp 7.000</td>
-                            <td>per kg</td>
-                            <td><span class="status-badge status-ready">Aktif</span></td>
-                        </tr>
-                        <tr>
-                            <td>Setrika Saja</td>
-                            <td>Rp 3.000</td>
-                            <td>per kg</td>
-                            <td><span class="status-badge status-ready">Aktif</span></td>
-                        </tr>
-                        <tr>
-                            <td>Dry Clean</td>
-                            <td>Rp 15.000</td>
-                            <td>per kg</td>
-                            <td><span class="status-badge status-ready">Aktif</span></td>
-                        </tr>
-                        <tr>
-                            <td>Cuci Sepatu</td>
-                            <td>Rp 25.000</td>
-                            <td>per pasang</td>
-                            <td><span class="status-badge status-ready">Aktif</span></td>
-                        </tr>
-                        <tr>
-                            <td>Cuci Karpet</td>
-                            <td>Rp 20.000</td>
-                            <td>per m²</td>
-                            <td><span class="status-badge status-ready">Aktif</span></td>
-                        </tr>
-                    </tbody>
-                </table>
+    //         <table class="cart-table">
+    //             <thead>
+    //                 <tr>
+    //                     <th>Layanan</th>
+    //                     <th>Harga</th>
+    //                     <th>Satuan</th>
+    //                     <th>Status</th>
+    //                 </tr>
+    //             </thead>
+    //             <tbody>
+    //                 <tr>
+    //                     <td>Cuci Kering</td>
+    //                     <td>Rp 5.000</td>
+    //                     <td>per kg</td>
+    //                     <td><span class="status-badge status-ready">Aktif</span></td>
+    //                 </tr>
+    //                 <tr>
+    //                     <td>Cuci Setrika</td>
+    //                     <td>Rp 7.000</td>
+    //                     <td>per kg</td>
+    //                     <td><span class="status-badge status-ready">Aktif</span></td>
+    //                 </tr>
+    //                 <tr>
+    //                     <td>Setrika Saja</td>
+    //                     <td>Rp 3.000</td>
+    //                     <td>per kg</td>
+    //                     <td><span class="status-badge status-ready">Aktif</span></td>
+    //                 </tr>
+    //                 <tr>
+    //                     <td>Dry Clean</td>
+    //                     <td>Rp 15.000</td>
+    //                     <td>per kg</td>
+    //                     <td><span class="status-badge status-ready">Aktif</span></td>
+    //                 </tr>
+    //                 <tr>
+    //                     <td>Cuci Sepatu</td>
+    //                     <td>Rp 25.000</td>
+    //                     <td>per pasang</td>
+    //                     <td><span class="status-badge status-ready">Aktif</span></td>
+    //                 </tr>
+    //                 <tr>
+    //                     <td>Cuci Karpet</td>
+    //                     <td>Rp 20.000</td>
+    //                     <td>per m²</td>
+    //                     <td><span class="status-badge status-ready">Aktif</span></td>
+    //                 </tr>
+    //             </tbody>
+    //         </table>
 
-                <div style="text-align: center; margin-top: 20px;">
-                    <button class="btn btn-primary" onclick="alert('Fitur akan segera tersedia!')">
-                        ➕ Tambah Layanan Baru
-                    </button>
-                </div>
-            `;
+    //         <div style="text-align: center; margin-top: 20px;">
+    //             <button class="btn btn-primary" onclick="alert('Fitur akan segera tersedia!')">
+    //                 ➕ Tambah Layanan Baru
+    //             </button>
+    //         </div>
+    //     `;
 
-            document.getElementById("modalContent").innerHTML = servicesHtml;
-            document.getElementById("transactionModal").style.display = "block";
-        }
+        //     document.getElementById("modalContent").innerHTML = servicesHtml;
+        //     document.getElementById("transactionModal").style.display = "block";
+        // }
 
         async function updateTransactionStatus(transactionId) {
             try {
@@ -1005,10 +1005,10 @@
                         <label>Pilih Status Baru:</label>
                         <select id="newStatus" style="width: 100%; padding: 10px; margin: 10px 0;">
                             ${statusOptions.map(option => `
-                                                                                                        <option value="${option.value}" ${transaction.order_status == option.value ? "selected" : ""}>
-                                                                                                            ${option.text}
-                                                                                                        </option>
-                                                                                                    `).join("")}
+                                                                                                                <option value="${option.value}" ${transaction.order_status == option.value ? "selected" : ""}>
+                                                                                                                    ${option.text}
+                                                                                                                </option>
+                                                                                                            `).join("")}
                         </select>
                     </div>
                     <div style="text-align: center; margin-top: 20px;">

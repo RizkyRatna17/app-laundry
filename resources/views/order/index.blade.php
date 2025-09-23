@@ -23,7 +23,7 @@
                         <tbody>
                             @foreach ($orders as $order)
                             <tr>
-                                <td><a href="{{ route('order.show', $order->id) }}">{{ $order->order_code }}</a></td>
+                                <td><a href="{{ route('order.create', $order->id) }}">{{ $order->order_code }}</a></td>
                                 <td>{{ $order->customer->customer_name }}</td>
                                 <td>{{ date('d F Y', strtotime($order->order_date)) }}</td>
                                 <td>{{ date('d F Y', strtotime($order->order_end_date)) }}</td>
