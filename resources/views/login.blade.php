@@ -73,6 +73,12 @@
 
                                 <div class="card-body">
 
+                                    <div class="pt-5 ">
+                                        <span style="color: #f80606;">
+                                            <h3 class="text-center">Laundry Neko</h3>
+                                        </span>
+                                    </div>
+
                                     <div class="pt-4 pb-2">
                                         <h5 class="card-title text-center pb-0 fs-4">Login to Your Account</h5>
                                         <p class="text-center small">Enter your email & password to login</p>

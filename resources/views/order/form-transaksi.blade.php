@@ -520,6 +520,8 @@
                     <div class="total-section">
                         <h3>Total Pembayaran</h3>
                         <div class="total-amount" id="totalAmount">Rp 0</div>
+                        <h5>Pajak 10%</h5>
+                        <input type="hidden" id="ppn">
                         <button class="btn btn-success" onclick="processTransaction()"
                             style="width: 100%; margin-top: 15px">
                             💳 Proses Transaksi
@@ -566,6 +568,11 @@
             </button> --}}
             <button class="btn btn-danger" onclick="clearCart()" style="margin: 0 10px">
                 🗑️ Bersihkan Keranjang
+            </button>
+            <button class="btn btn-success" style="margin: 0 10px">
+                <a href="{{ route('order.index') }}" style="text-decoration: none; color: white;">
+                    🏠 Kembali ke Transaksi
+                </a>
             </button>
         </div>
     </div>
@@ -626,7 +633,8 @@
                 return;
             }
 
-            const total = cart.reduce((sum, item) => sum + item.subtotal, 0);
+            let total = cart.reduce((sum, item) => sum + item.subtotal, 0);
+            total = total + (total * 0.1);
 
             const transaction = {
                 id: `TRX-${transactionCounter.toString().padStart(3, "0")}`,
@@ -675,6 +683,7 @@
         }
 
         function showReceipt(transaction) {
+            const ppn = document.getElementById("ppn").value;
             const receiptHtml = `
                 <div class="receipt">
                     <div class="receipt-header">
@@ -697,19 +706,23 @@
                         ${transaction.items
                           .map(
                             (item) => `
-                                                                                                                                 <div class="receipt-item">
-                                                                                                                                 <span>${item.service} (${item.weight} ${
-                                                                                                                                item.service.includes("Sepatu")
-                                                                                                                                ? "pasang"
-                                                                                                                                : item.service.includes("Karpet")
-                                                                                                                                ? "m²"
-                                                                                                                                : "kg"
-                                                                                                                                })</span>
-                                                                                                                                <span>Rp ${item.subtotal.toLocaleString()}</span>
-                                                                                                                                </div>
-                                                                                                                            `
+                                            <div class="receipt-item">
+                                            <span>${item.service} (${item.weight} ${
+                                        item.service.includes("Sepatu")
+                                        ? "pasang"
+                                        : item.service.includes("Karpet")
+                                        ? "m²"
+                                        : "kg"
+                                        })</span>
+                                        <span>Rp ${item.subtotal.toLocaleString()}</span>
+                                        </div>
+                                    `
                           )
                           .join("")}
+                          <div class="receipt-item">
+                                <span> Pajak 10%</span>
+                            <span>Rp ${ppn.toLocaleString()}</span>
+                        </div>
                     </div>
 
                     <div class="receipt-total">
@@ -766,7 +779,7 @@
                       .map(
                         (item) =>
                           `${item.service.service_name} - ${item.qty}kg
-                                                                                                                                                      `
+                                                                                                                                                                                                                                  `
                       )
                       .join(", ")}</p>
                     <p>💰 Rp ${transaction.total.toLocaleString()}</p>
@@ -810,20 +823,20 @@
                 <h2>📋 Semua Transaksi</h2>
                 <div style="max-height: 400px; overflow-y: auto;">
                     ${transactions.map((transaction) => `
-                                                                                                                            <div class="transaction-item">
-                                                                                                                            <h4>${transaction.order_code} - ${
-                                                                                                                            transaction.customer.customer_name}</h4>
-                                                                                                                        <p>📞 ${formatPhoneNumberDynamic(transaction.customer.phone)}</p>
-                                                                                                                        <p>🛍️ ${transaction.details.map((item) =>`${item.service.service_name} - ${item.qty}kg`).join(", ")}</p>
-                                                                                                                        <p>💰 Rp ${transaction.total.toLocaleString()}</p>
-                                                                                                                        <p>📅 ${new Date(transaction.order_date).toLocaleString("id-ID")}</p>
-                                                                                                                        <span class="status-badge status-${transaction.order_status}">${transaction.order_status == 0? "Proses": transaction.order_status == 1 ? "Selesai": ""}</span>
-                                                                                                                        <button class="btn btn-primary" onclick="updateTransactionStatus('${
-                                                                                                                                                          transaction.id}')" style="margin-top: 10px; padding: 5px 15px; font-size: 12px;">
-                                                                                                                                                            📝 Update Status
-                                                                                                                                                        </button>
-                                                                                                                                                    </div>
-                                                                                                                                               `
+                                                                                                                                                                                                        <div class="transaction-item">
+                                                                                                                                                                                                        <h4>${transaction.order_code} - ${
+                                                                                                                                                                                                        transaction.customer.customer_name}</h4>
+                                                                                                                                                                                                    <p>📞 ${formatPhoneNumberDynamic(transaction.customer.phone)}</p>
+                                                                                                                                                                                                    <p>🛍️ ${transaction.details.map((item) =>`${item.service.service_name} - ${item.qty}kg`).join(", ")}</p>
+                                                                                                                                                                                                    <p>💰 Rp ${transaction.total.toLocaleString()}</p>
+                                                                                                                                                                                                    <p>📅 ${new Date(transaction.order_date).toLocaleString("id-ID")}</p>
+                                                                                                                                                                                                    <span class="status-badge status-${transaction.order_status}">${transaction.order_status == 0? "Proses": transaction.order_status == 1 ? "Selesai": ""}</span>
+                                                                                                                                                                                                    <button class="btn btn-primary" onclick="updateTransactionStatus('${
+                                                                                                                                                                                                                                      transaction.id}')" style="margin-top: 10px; padding: 5px 15px; font-size: 12px;">
+                                                                                                                                                                                                                                        📝 Update Status
+                                                                                                                                                                                                                                    </button>
+                                                                                                                                                                                                                                </div>
+                                                                                                                                                                                                                           `
                       )
                       .join("")}
                 </div>
@@ -890,12 +903,12 @@
                     </thead>
                     <tbody>
                         ${Object.entries(serviceStats).map(([service, stats]) => `
-                                                                                                                        <tr>
-                                                                                                                            <td>${service}</td>
-                                                                                                                            <td>${stats.count}</td>
-                                                                                                                            <td>Rp. ${stats.revenue.toLocaleString('id-ID')}</td>
-                                                                                                                        </tr>
-                                                                                                                    `).join('')}
+                                                                                                                                                                                                    <tr>
+                                                                                                                                                                                                        <td>${service}</td>
+                                                                                                                                                                                                        <td>${stats.count}</td>
+                                                                                                                                                                                                        <td>Rp. ${stats.revenue.toLocaleString('id-ID')}</td>
+                                                                                                                                                                                                    </tr>
+                                                                                                                                                                                                `).join('')}
                     </tbody>
                 </table>
             `;
@@ -1005,10 +1018,10 @@
                         <label>Pilih Status Baru:</label>
                         <select id="newStatus" style="width: 100%; padding: 10px; margin: 10px 0;">
                             ${statusOptions.map(option => `
-                                                                                                                <option value="${option.value}" ${transaction.order_status == option.value ? "selected" : ""}>
-                                                                                                                    ${option.text}
-                                                                                                                </option>
-                                                                                                            `).join("")}
+                                                                                                                                                                                            <option value="${option.value}" ${transaction.order_status == option.value ? "selected" : ""}>
+                                                                                                                                                                                                ${option.text}
+                                                                                                                                                                                            </option>
+                                                                                                                                                                                        `).join("")}
                         </select>
                     </div>
                     <div style="text-align: center; margin-top: 20px;">
@@ -1113,6 +1126,7 @@
 
             const price = parseFloat(service.price);
             const subtotal = price * weight;
+            console.log(price, subtotal)
 
             const item = {
                 id: Date.now(),
@@ -1179,6 +1193,8 @@
                 `;
                 total += item.subtotal;
             });
+            document.getElementById("ppn").value = total * 0.1;
+            total = total + (total * 0.1)
 
             cartItems.innerHTML = html;
             totalAmount.textContent = `Rp ${total.toLocaleString()}`;
@@ -1262,6 +1278,32 @@
 
         // panggil saat halaman load
         document.addEventListener("DOMContentLoaded", loadOrders);
+        async function pickupOrder(orderId) {
+            try {
+                let response = await fetch(`/order/${orderId}`, {
+                    method: "PUT", // sesuai resource controller
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content
+                    },
+                    body: JSON.stringify({
+                        order_pay: 50000, // nilai pembayaran
+                        order_change: 0 // nilai kembalian
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error("HTTP error!! Status: " + response.status);
+                }
+
+                let result = await response.json();
+                console.log(result);
+
+                alert(result.message); // tampilkan pesan sukses
+            } catch (error) {
+                console.error("Gagal pickup:", error);
+            }
+        }
     </script>
 
 </body>

@@ -16,7 +16,7 @@ class TransOrderController extends Controller
     public function index()
     {
         $title = "Transaction Order";
-        $orders = TransOrders::orderBy('id', 'desc')->get();
+        $orders = TransOrders::with(['customer', 'details.service'])->orderBy('id', 'desc')->get();
         confirmDelete('title', 'text');
         return view('order.index', compact('title', 'orders'));
     }
@@ -178,16 +178,24 @@ class TransOrderController extends Controller
 
 
     public function getSingleOrder($id)
-{
-    $order = TransOrders::with(['customer', 'details.service'])->where('id', $id)->first();
+    {
+        $order = TransOrders::with(['customer', 'details.service'])->where('id', $id)->first();
 
-    return response()->json($order);
-}
-public function updateOrderStatus(Request $request, $id)
+        return response()->json($order);
+    }
+    public function updateOrderStatus(Request $request, $id)
     {
         $order = TransOrders::findOrFail($id);
         $order->order_status = $request->order_status;
         $order->save();
+
+        if ($order->order_status == 1) {
+            TransLaundryPickup::create([
+                'id_order' => $order->id,
+                'id_customer' => $order->customer->id,
+                'pickup_date' => date('Y-m-d H:i:s')
+            ]);
+        }
 
         return response()->json([
             'status' => true,
@@ -221,6 +229,44 @@ public function updateOrderStatus(Request $request, $id)
             ->get();
 
         return response()->json($orders);
+    }
+
+    public function reportsJson()
+    {
+        $orders = TransOrders::with(['details.service'])->get();
+
+        $today = now();
+        $thisMonth = $today->month;
+        $thisYear = $today->year;
+
+        $monthlyTransactions = $orders->filter(function ($order) use ($thisMonth, $thisYear) {
+            $date = \Carbon\Carbon::parse($order->order_date);
+            return $date->month == $thisMonth && $date->year == $thisYear;
+        });
+
+        $monthlyRevenue = $monthlyTransactions->sum('total');
+
+        $serviceStats = [];
+        foreach ($orders as $order) {
+            foreach ($order->details as $detail) {
+                $serviceName = $detail->service->service_name ?? '-';
+                if (!isset($serviceStats[$serviceName])) {
+                    $serviceStats[$serviceName] = [
+                        'count' => 0,
+                        'revenue' => 0
+                    ];
+                }
+                $serviceStats[$serviceName]['count']++;
+                $serviceStats[$serviceName]['revenue'] += $detail->subtotal;
+            }
+        }
+
+        return response()->json([
+            'totalTransactions' => $orders->count(),
+            'monthlyTransactions' => $monthlyTransactions->count(),
+            'monthlyRevenue' => $monthlyRevenue,
+            'serviceStats' => $serviceStats
+        ]);
     }
 
 }
